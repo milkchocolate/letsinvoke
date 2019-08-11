@@ -1,0 +1,96 @@
+{
+  "AWSTemplateFormatVersion": "2010-09-09",
+  "Transform": "AWS::Serverless-2016-10-31",
+  "Description": "Lambda Function - letsinvoke",
+  "Parameters": {
+    "EnvironmentRelatedVariable": {
+      "Default": "test",
+      "Description": "Environment Related Variable",
+      "Type": "String"
+    }
+  },
+  "Resources": {
+    "Letsinvoke": {
+      "Type": "AWS::Serverless::Function",
+      "Properties": {
+        "CodeUri": "../../build/libs/letsinvoke.jar",
+        "FunctionName": "letsinvoke",
+        "Description": "Let's invoke",
+        "Handler": "org.mad.letsinvoke.Invoker::invoke",
+        "MemorySize": 512,
+        "Role": {
+          "Fn::GetAtt": [
+            "LetsinvokeRole",
+            "Arn"
+          ]
+        },
+        "Runtime": "java8",
+        "Timeout": 300,
+        "Events": {
+          "ScheduleEvery1Minute": {
+            "Type": "Schedule",
+            "Properties": {
+              "Schedule": "rate(1 minute)"
+            }
+          }
+        }
+      }
+    },
+    "LetsinvokeLogGroup": {
+      "Type": "AWS::Logs::LogGroup",
+      "DependsOn": "Letsinvoke",
+      "Properties": {
+        "LogGroupName": {
+          "Fn::Join": [
+            "/",
+            [
+              "/aws/lambda",
+              {
+                "Ref": "Letsinvoke"
+              }
+            ]
+          ]
+        },
+        "RetentionInDays": 30
+      }
+    },
+    "LetsinvokeRole": {
+      "Type": "AWS::IAM::Role",
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Version": "2012-10-17",
+          "Statement": [
+            {
+              "Effect": "Allow",
+              "Principal": {
+                "Service": [
+                  "lambda.amazonaws.com"
+                ]
+              },
+              "Action": [
+                "sts:AssumeRole"
+              ]
+            }
+          ]
+        },
+        "Policies": [
+          {
+            "PolicyName": "LetsinvokePolicy",
+            "PolicyDocument": {
+              "Version": "2012-10-17",
+              "Statement": [
+                {
+                  "Effect": "Allow",
+                  "Action": [
+                    "logs:*"
+                  ],
+                  "Resource": "*"
+                }
+              ]
+            }
+          }
+        ]
+      }
+    }
+  }
+}
