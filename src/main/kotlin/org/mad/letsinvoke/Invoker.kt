@@ -5,7 +5,7 @@ package org.mad.letsinvoke
 
 class Invoker {
     fun invoke(): String {
-        println("I'm doing my job !!!")
-        return "Invoke!!!"
+        println("I'm doing my job 1")
+        return "Invoke1"
     }
 }
